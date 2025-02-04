@@ -1,4 +1,4 @@
-# 📚 Anna Davies
+# 🖥️ Anna Davies
 
 **`Aspiring Computer Scientist`**
 
