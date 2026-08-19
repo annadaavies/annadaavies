@@ -1,0 +1,44 @@
+name: Update README gif
+
+on:
+  workflow_dispatch:        # lets you trigger it by hand from the Actions tab
+  schedule:
+    - cron: '0 0 * * *'     # daily at 00:00 UTC
+
+permissions:
+  contents: write           # required so the job can push the regenerated gif
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate gif
+        run: python main.py
+        env:
+          # Default token is enough for public stats. For private-repo commit
+          # counts, create a fine-grained PAT and use secrets.MY_PAT instead.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # These override the os.environ.setdefault() values in main.py:
+          GIFOS_GENERAL_FPS: 15
+          GIFOS_GENERAL_LOOP_COUNT: 0
+          GIFOS_GENERAL_COLOR_SCHEME: catppuccin-mocha
+
+      - name: Commit and push
+        run: |
+          git add README.md output.gif
+          git -c user.name=github-actions[bot] \
+              -c user.email=github-actions[bot]@users.noreply.github.com \
+              commit -m "chore: regenerate terminal gif" || echo "no changes"
+          git push

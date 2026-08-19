@@ -1,0 +1,4 @@
+# Git, not PyPI: the 0.0.3 release crashes on numeric env vars (fixed on main).
+github-readme-terminal @ git+https://github.com/x0rzavi/github-readme-terminal.git@main
+python-dotenv
+pillow
