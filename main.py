@@ -27,15 +27,15 @@ IGNORE_REPOS = []          # repos to exclude from stats
 WRITE_README = True        # regenerate README.md with the gif embedded
 END_HOLD = 105             # frames holding the final screen (15fps -> 7s)
 
-# Canvas and font are coupled: rows = (HEIGHT - 2*YPAD) // cell_h, cols =
-# (WIDTH - 2*XPAD) // cell_w. gifos' bundled gohufont is a BITMAP face that
-# ignores font_size, so scaling the text at all means TrueType. Size 28 is near
-# the ceiling — larger pushes WIDTH past GitHub's ~900px column, which scales
-# the image back down. BODY_FONT = None returns to gohufont.
-WIDTH, HEIGHT, XPAD, YPAD = 900, 850, 15, 15
-BODY_FONT = Path(__file__).parent / "fonts" / "VT323-Regular.ttf"
-BODY_FONT_SIZE = 28
-LINE_SPACING = 1           # VT323 carries its own leading
+# Canvas and font match the upstream template: 750x500 with gifos' bundled
+# gohufont, which gives a 90x26 grid. gohufont is a BITMAP face and ignores
+# font_size — point BODY_FONT at a TrueType file to scale the text instead,
+# but then recheck WIDTH/HEIGHT and ICON_ROWS, since the grid is derived as
+# rows = (HEIGHT - 2*YPAD) // cell_h and cols = (WIDTH - 2*XPAD) // cell_w.
+WIDTH, HEIGHT, XPAD, YPAD = 750, 500, 15, 15
+BODY_FONT = None
+BODY_FONT_SIZE = 15
+LINE_SPACING = 4
 
 # Entries with an empty value are skipped; an empty panel disappears entirely.
 ABOUT = {
@@ -61,7 +61,7 @@ LOGO_FONT_CANDIDATES = [
 ]
 
 ICON_PATH = Path(__file__).parent / "assets" / "crt.png"   # see make_icon.py
-ICON_ROWS = 10     # 256px / 28px per row — recheck if the body font changes
+ICON_ROWS = 15     # 256px / 18px per row — recheck if the body font changes
 ICON_COL = 3       # left margin, in columns
 ICON_GAP = 5       # blank columns between icon and panels
 
@@ -147,7 +147,6 @@ def main():
             "Stars Earned": s.total_stargazers,
             "Commits": s.total_commits_all_time,
             "Pull Requests": s.total_pull_requests_made,
-            "Merged PR %": s.pull_requests_merge_percentage,
             "Contributions": s.total_repo_contributions,
             "Followers": s.total_followers,
             "Top Languages": ", ".join(lang[0] for lang in s.languages_sorted[:5]),
@@ -177,7 +176,7 @@ def main():
     t.gen_text("\n".join(lines), 3, text_col, count=5, contin=True)
 
     t.toggle_show_cursor(True)
-    t.gen_prompt(t.curr_row + 1)
+    t.gen_prompt(t.curr_row + 2)   # +2 leaves a blank row above the sign-off
     t.gen_typing_text(
         "\x1b[92m# Thanks for stopping by!\x1b[0m", t.curr_row, contin=True
     )
